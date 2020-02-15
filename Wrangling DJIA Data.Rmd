@@ -1,0 +1,52 @@
+---
+title: "Wrangling DJIA data"
+output: pdf_document
+---
+1) reading the data
+```{r}
+library(readxl)
+please_work <- read_xls("DJIA_2015_Present_excel.xls")
+```
+
+2) isolating microsoft returns
+```{r}
+library(tidyverse)
+MSFT_Data <- please_work %>%
+  filter(TSYMBOL == "MSFT") 
+  
+
+ggplot(MSFT_Data, mapping = aes(date, RETX)) + geom_point()
+```
+
+3) calculating and plotting bid ask spreads
+
+```{r}
+library(tidyverse)
+bid_ask <- MSFT_Data %>% 
+  mutate(difference = ASK - BID)
+  
+
+ggplot(bid_ask) + geom_point(mapping = aes(date,difference))
+mean(bid_ask$difference)
+```
+
+4) calculating overeactions
+```{r}
+library(tidyverse)
+library(ggplot2)
+return_data <- please_work %>% 
+  select(date,TICKER,RETX) %>% 
+  filter(RETX != "C")
+
+
+
+
+ggplot(return_data, mapping = aes(RETX)) + geom_histogram(stat = "count")
+
+
+
+  
+
+
+  
+```
