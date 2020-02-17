@@ -45,7 +45,6 @@ long_data_1 <- dailyReturnsPart1 %>%
   gather(COMNAM, returns, -date)
 ```
 
-# gathering data and coverting it from wide to long 
 ```{r}
 library(tidyr)
 long_data_2 <- dailyReturnsPart2 %>% 
@@ -60,7 +59,6 @@ garys_data_joined <- long_data_1 %>%
 ```
 
 Changing the Date
-And creating 1's and 0's
 ```{r}
 library(tidyverse)
 library(lubridate)
