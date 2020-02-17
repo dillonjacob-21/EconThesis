@@ -8,6 +8,7 @@ library(readxl)
 please_work <- read_xls("DJIA_2015_Present_excel.xls")
 ```
 
+
 2) isolating microsoft returns
 ```{r}
 library(tidyverse)
@@ -50,3 +51,8 @@ ggplot(return_data, mapping = aes(RETX)) + geom_histogram(stat = "count")
 
   
 ```
+
+```{r}
+Gary_data_1 <- read.csv()
+```
+
