@@ -2,7 +2,9 @@
 title: "Merging Daily Return Data"
 author: "Dillon Jacob"
 date: "2/15/2020"
-output: pdf_document
+output:
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r}
@@ -10,20 +12,31 @@ library(tidyr)
 library(readxl)
 library(lubridate)
 #?ialibrary(janitor)
+```
+
+```{r, include=FALSE}
+library(readxl)
+please_work <- read_xls("DJIA_2015_Present_excel.xls")
+```
+
+
+2) isolating microsoft returns
+```{r}
+library(tidyverse)
+MSFT_Data <- please_work %>%
+  filter(TSYMBOL == "MSFT") 
+  
+```
+
+```{r, include = FALSE}
 dailyReturnsPart1 <- read_xlsx("dailyReturnsPart1.xlsx")
 
 ```
 
 
-```{r}
-```
-
-
-```{r}
+```{r, include = FALSE}
 dailyReturnsPart2 <- read_xlsx("dailyReturnsPart2.xlsx")
 ```
-
-
 
 # gathering data and converting it from wide to long
 ```{r}
@@ -32,14 +45,12 @@ long_data_1 <- dailyReturnsPart1 %>%
   gather(COMNAM, returns, -date)
 ```
 
-
 # gathering data and coverting it from wide to long 
 ```{r}
 library(tidyr)
 long_data_2 <- dailyReturnsPart2 %>% 
   gather(COMNAM, returns, -date)
 ```
-
 
 #joining data sets
 ```{r}
@@ -49,18 +60,39 @@ garys_data_joined <- long_data_1 %>%
 ```
 
 Changing the Date
+And creating 1's and 0's
 ```{r}
-
 library(tidyverse)
 library(lubridate)
 
 garys_cleaned_data <- garys_data_joined %>% 
-  mutate(date = ymd(date))
+  mutate(date = ymd(date)) 
 ```
 
+# graphical representations
+```{r}
+library(tidyverse)
+microsoft_mini <- garys_cleaned_data %>% 
+  filter(COMNAM == "Microsoft") %>% 
+  filter(date > "1986-03-13") %>% 
+  mutate(returns = as.numeric(returns))
 
+  
+ggplot(microsoft_mini, mapping = aes(date,returns)) + geom_point()
+
+```
 
 ```{r}
+library(tidyverse)
+microsoft_master <- MSFT_Data %>% 
+  select(date,RETX, COMNAM) %>%
+  rename(returns = RETX)
+```
 
+```{r}
+Microsoft_Master_real <- microsoft_mini %>% 
+  rbind(microsoft_master)
+
+ggplot(Microsoft_Master_real, aes(date, returns)) + geom_point()
 ```
 

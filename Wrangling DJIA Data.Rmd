@@ -3,7 +3,7 @@ title: "Wrangling DJIA data"
 output: pdf_document
 ---
 1) reading the data
-```{r}
+```{r, include = FALSE}
 library(readxl)
 please_work <- read_xls("DJIA_2015_Present_excel.xls")
 ```
@@ -47,12 +47,7 @@ ggplot(return_data, mapping = aes(RETX)) + geom_histogram(stat = "count")
 
 
   
-
-
-  
 ```
 
-```{r}
-Gary_data_1 <- read.csv()
-```
+
 
