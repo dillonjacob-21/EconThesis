@@ -62,9 +62,21 @@ Changing the Date
 ```{r}
 library(tidyverse)
 library(lubridate)
+library(readxl)
 
-garys_cleaned_data <- garys_data_joined %>% 
-  mutate(date = ymd(date)) 
+garys_cleaned_data <- garys_data_joined %>%
+  drop_na(date) %>% 
+  rename(RETX = returns) %>% 
+  mutate(date = ymd(date)) %>%
+  mutate(year = as.numeric(substr(date,1,4))) %>% 
+  mutate(month = as.numeric(substr(date,6,7))) %>% 
+  mutate(day = as.numeric(substr(date, 9,10))) %>%
+  mutate(new_date = paste(month,day,year, sep = "-")) %>% 
+  mutate(date = mdy(new_date)) %>% 
+  select(-year, -month, -new_date, -day) %>% 
+  filter(date != "2016-01-01")
+
+
 ```
 
 # graphical representations
@@ -92,5 +104,143 @@ Microsoft_Master_real <- microsoft_mini %>%
   rbind(microsoft_master)
 
 ggplot(Microsoft_Master_real, aes(date, returns)) + geom_point()
+```
+
+reading in 2016 - 2019
+```{r}
+library(tidyverse)
+data_2016_2019 <- X2016_2019 %>% 
+  select(COMNAM, RETX, date) %>% 
+  mutate(month = as.numeric(substr(date,1,2))) %>% 
+  mutate(day = as.numeric(substr(date,4,5))) %>% 
+  mutate(year = as.numeric(substr(date,7,10))) %>%
+  mutate(new_date = paste(month,day,year,sep = "-")) %>% 
+  mutate(date = mdy(new_date)) %>% 
+  select(-day,-year,-month,-new_date)
+
+
+class(data_2016_2019$date)
+  
+
+
+
+```
+
+
+# dow data before 2007
+```{r}
+Dow_data <- X1928_March30_2007 %>% 
+  mutate(day = as.numeric(substr(date,1,2))) %>% 
+  mutate(month = substr(date, 3,5)) %>% 
+  mutate(year = substr(date,6,9)) %>% 
+  mutate(new_month = "") 
+ 
+
+for (i in 1:length(Dow_data$date)) {
+  if (Dow_data$month[i] == "OCT") {
+    Dow_data$new_month[i] = 10 
+    }
+  else if(Dow_data$month[i] == "NOV") {
+    Dow_data$new_month[i] = 11
+  }
+  else if(Dow_data$month[i] == "DEC") {
+    Dow_data$new_month[i] = 12
+  }
+  else if(Dow_data$month[i] == "JAN") {
+    Dow_data$new_month[i] = 01
+  }
+  else if(Dow_data$month[i] == "FEB") {
+    Dow_data$new_month[i] = 02
+  }
+  else if(Dow_data$month[i] == "MAR") {
+    Dow_data$new_month[i] = 03
+  }
+  else if(Dow_data$month[i] == "APR") {
+    Dow_data$new_month[i] = 04
+  }
+  else if(Dow_data$month[i] == "MAY") {
+    Dow_data$new_month[i] = 05
+  }
+  else if(Dow_data$month[i] == "JUN") {
+    Dow_data$new_month[i] = 06
+  }
+  else if(Dow_data$month[i] == "JUL") {
+    Dow_data$new_month[i] = 07
+  }
+  else if(Dow_data$month[i] == "AUG") {
+    Dow_data$new_month[i] = 08
+  }
+  else {
+    Dow_data$new_month[i] = 09
+  }
+}
+
+Dow_data_1928_07 <- Dow_data %>% 
+  mutate(date = paste(year,new_month,day ,sep = "-")) %>% 
+  mutate(date = ymd(date)) %>% 
+  select(-day,-month,-year,-new_month)
+
+
+```
+
+dow jones after 2007
+```{r}
+library(tidyverse)
+library(janitor)
+Dow_data_07_Present <- DJIA2007_Present %>%
+  clean_names() %>% 
+  mutate(date = ymd(date)) %>% 
+  mutate(dji = adj_close) %>% 
+  select(-adj_close)
+
+Master_dow_data <- Dow_data_1928_07 %>% 
+  rbind(Dow_data_07_Present) %>%
+  mutate(year = as.numeric(substr(date,1,4))) %>% 
+  filter(year != 2020) %>% 
+  select(-year) %>% 
+  mutate(lag_price = lag(dji)) %>% 
+  mutate(RETX = (dji/lag_price) - 1) %>% 
+  mutate(COMNAM = "djia") %>% 
+  select(-lag_price,-dji)
+
+```
+
+
+
+
+
+comnibing 2016 -2019 with garys data, and joining DIJA data 
+```{r}
+library(tidyverse)
+library(lubridate)
+
+master_data <- data_2016_2019 %>% 
+  rbind(garys_cleaned_data) %>% 
+  mutate(date = ymd(date)) %>% 
+  rbind(Master_dow_data) %>% 
+  mutate(difference = "")
+
+unique_dates <- unique(master_data$date)
+
+
+for (i in 1:length(master_data$RETX)) {
+  if (master_data$RETX[i] != "C" & is.na(master_data$RETX[i]) == FALSE){
+    as.numeric(master_data$RETX[i])
+  }
+}
+
+for (i in 1:length(unique_dates)) {
+  individual_days <- subset(master_data, date == unique_dates[i])
+  dija_return <- subset(individual_days, COMNAM == "djia")
+  dija_value <- as.numeric(dija_return$RETX)
+  for (j in 1:length(individual_days$date)){
+    if (individual_days$COMNAM[j] != "djia" & is.na(individual_days$RETX[j]) == FALSE & individual_days$RETX[j] != "C") {
+      tryCatch({individual_days$difference[j] <- as.numeric(individual_days$RETX[j]) - dija_value}, 
+               error = function(x) {
+                 return(NA)
+               })
+    }
+  }
+}
 ```
 
