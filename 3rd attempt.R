@@ -1,10 +1,15 @@
 
 library(tidyverse)
-Pull_1 <- read.csv("PULL1.csv")
+library(readxl)
+Pull_1 <- read.csv("PULL_1_OG.csv",stringsAsFactors = FALSE)
 Pull_2 <- read.csv("PULL2.csv")
 
-Pull_1_factors <- read.csv("PULL1.csv", stringsAsFactors = FALSE)
 
+
+Pull_1$RETX <- as.numeric(Pull_1$RETX)
+
+Pull_1_edited <- Pull_1 %>% 
+  drop_na(RETX)
 
 
 
@@ -12,6 +17,7 @@ Pull_1_factors <- read.csv("PULL1.csv", stringsAsFactors = FALSE)
 ##first deleted observations with no COMNAM
 #Now we have 159, and we just deleted them
 #Second removed 159 NAs, or all the returns with NAs
+
 Pull_2_edited <- Pull_2 %>% 
   filter(COMNAM != "") %>% 
   filter(RETX != "") %>%
@@ -19,24 +25,11 @@ Pull_2_edited <- Pull_2 %>%
 
 #Pull 2 edited is fixed and finished
 
-class(Pull_1_factors$RETX[6])
-
-transform(Pull_1_factors, RETX = as.numeric(RETX))
-
-Pull_1_edited <- Pull_1_factors %>% 
-  mutate(RETX = ifelse(RETX == "0",0,RETX))
-  
-
-
-
-
-Full1 <- rbind(Pull_1_edited,Pull_2_edited)
-
-sum(is.na(Full1$RETX))
+Full1 <- rbind(Pull_2_edited,Pull_1_edited)
 
 
 COMNAM_PERMNO <- Full1 %>%
-  distinct(PERMNO,COMNAM) 
+  distinct(PERMNO,COMNAM)
 
 x <- unique(Full1$PERMNO)
 
@@ -50,8 +43,7 @@ Correct_dates <- Full1 %>%
   mutate(year = ifelse(year > 2020, year - 100,year)) %>%
   mutate(new_date = paste(month,day,year,sep ="/")) %>%
   mutate(date = mdy(new_date)) %>% 
-  select(-new_date,-year,-month,-day) %>% 
-  select(date,PERMNO,COMNAM,RETX,vwretd,ewretd)
+  select(-new_date,-year,-month,-day)
 
 class(Correct_dates$date)
 
@@ -154,18 +146,113 @@ worthy_data_frame <- Goldman_data_frame %>%
 worthy_data_frame[is.na(worthy_data_frame)] <- 0
 worthy_data_frame$in_or_out_total <- worthy_data_frame$`in_or_out 1` + worthy_data_frame$`in_or_out 2` + worthy_data_frame$`in_or_out 3`
 
+
+sum(is.na(worthy_data_frame$RETX))
+
 Master <- worthy_data_frame %>%
   select(-`in_or_out 1`,-`in_or_out 2`,-`in_or_out 3`) %>% 
   filter(in_or_out_total == 1) %>%
   group_by(date) %>%
-  mutate(RETX = as.numeric(as.character(RETX,na.rm=TRUE))) %>% 
-  summarise(average= mean(RETX,na.rm=TRUE))
+  summarise(average= mean(RETX))
+
+
 
 Master_2 <- worthy_data_frame %>% 
   left_join(Master, by = "date") %>%
   filter(in_or_out_total == 1) %>% 
-  mutate(RETX = as.numeric(as.character(RETX,na.rm=TRUE))) %>% 
-  mutate(difference = RETX - average)
+  mutate(difference = RETX - average) %>%
+  mutate(counter_05_positive = ifelse(difference > .05,1,0)) %>% 
+  mutate(counter_10_positive = ifelse(difference >.1,1,0)) %>% 
+  mutate(counter_15_positive = ifelse(difference > .15,1,0)) %>% 
+  mutate(counter_20_positive = ifelse(difference >.2,1,0)) %>% 
+  mutate(counter_05_negative = ifelse(difference < -.05,1,0)) %>% 
+  mutate(counter_10_negative = ifelse(difference < -.1,1,0)) %>% 
+  mutate(counter_15_negative = ifelse(difference < -.15,1,0)) %>% 
+  mutate(counter_20_negative = ifelse(difference < -.2,1,0))
+  
+
+#positive returns greater than 5%,10%,15%,and 20%
+sum(Master_2$counter_05_positive)
+# 3342
+sum(Master_2$counter_10_positive)
+#378
+sum(Master_2$counter_15_positive)
+#101
+sum(Master_2$counter_20_positive)
+#39
+
+sum(Master_2$counter_05_negative)
+#2625
+sum(Master_2$counter_10_negative)
+#299
+sum(Master_2$counter_15_negative)
+#83
+sum(Master_2$counter_20_negative)
+#35i have n
+
+
+#Normal Distribution Calculations
+
+mean(Master_2$RETX)
+#0.0002998885
+
+sd(Master_2$RETX)
+#0.01862142
+
+
+
+distinct_permno <- c()
+
+unique_dates <- c(unique(Master_2$date))
+
+worth <- data.frame()
+full_dates <- data.frame()
+final_loop <- data.frame()
+
+#way 1
+# create a list of all other companies and then calculate remove
+# I got it to work for an individual date, but it ends up returning only the relative average of the first one in the subsetted data frame and the last one 
+
+
+for (i in 1:length(unique_dates)) {
+  dates <- subset(Master_2, unique_dates[1] == Master_2$date)
+  distinct_permno <- c(unique(dates$PERMNO))
+  for (j in 1:length(distinct_permno)){
+    if (j==1){
+      dates_minus_29 <- subset(dates,distinct_permno[j] == dates$PERMNO)
+      dates_minus_1 <- subset(dates,distinct_permno[j] != dates$PERMNO)
+      dates_minus_1[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1$RETX)/length(dates_minus_1$RETX)
+      dates_minus_29[,paste("rel_mean",distinct_permno[j])] <- 0
+      full_dates <- rbind(dates_minus_1,dates_minus_29)
+      full_dates_1 <- full_dates %>% clean_names
+      } else {
+      dates_minus_29_2 <- subset(dates,distinct_permno[j] == dates$PERMNO)
+      dates_minus_1_2 <- subset(dates,distinct_permno[j] != dates$PERMNO)
+      dates_minus_1_2[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1$RETX)/length(dates_minus_1$RETX)
+      dates_minus_29_2[,paste("rel_mean",distinct_permno[j])] <- 0
+      full_dates_2 <- rbind(dates_minus_1_2,dates_minus_29_2)
+      full_dates_3 <- full_dates_2 %>% clean_names()
+      worth <- select(full_dates_3,permno,starts_with('rel_mean'))
+      final_loop <- full_dates_1 %>% left_join(worth, by = "permno")
+    }
+  }
+}
+
+
+
+
+
+#way 2
+for (i in 1:length(unique_dates)) {
+  dates <- subset(Master_2, unique_dates[1] == Master_2$date)
+    for (j in 1:length(distinct_permno)){
+      if (distinct_permno[j] == dates$PERMNO){
+        dates[,paste("rel_mean",distinct_permno[j])] <- (sum(dates$RETX) - dates$RETX[j])/29
+      }
+    }
+}
+
+
 
 
 
