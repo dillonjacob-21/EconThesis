@@ -171,6 +171,9 @@ Master_2 <- worthy_data_frame %>%
   mutate(counter_20_negative = ifelse(difference < -.2,1,0))
   
 
+
+write.csv(Master_2, "/Users/zacharysenator/Desktop/master_2.csv")
+
 #positive returns greater than 5%,10%,15%,and 20%
 sum(Master_2$counter_05_positive)
 # 3342
@@ -208,10 +211,11 @@ unique_dates <- c(unique(Master_2$date))
 worth <- data.frame()
 full_dates <- data.frame()
 final_loop <- data.frame()
-
+worth_2 <- data.frame(matrix("",nrow =27))
 #way 1
 # create a list of all other companies and then calculate remove
-# I got it to work for an individual date, but it ends up returning only the relative average of the first one in the subsetted data frame and the last one 
+# I got it to work for an individual date, but it ends up returning only the relative average of the first one in the subsetted data frame and the last one
+# make sure to paste the relative average where there is currently a 0 so that we can subtract the return of the day from the average return of the other 29 stocks
 
 
 for (i in 1:length(unique_dates)) {
@@ -228,29 +232,28 @@ for (i in 1:length(unique_dates)) {
       } else {
       dates_minus_29_2 <- subset(dates,distinct_permno[j] == dates$PERMNO)
       dates_minus_1_2 <- subset(dates,distinct_permno[j] != dates$PERMNO)
-      dates_minus_1_2[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1$RETX)/length(dates_minus_1$RETX)
+      dates_minus_1_2[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1_2$RETX)/length(dates_minus_1_2$RETX)
       dates_minus_29_2[,paste("rel_mean",distinct_permno[j])] <- 0
       full_dates_2 <- rbind(dates_minus_1_2,dates_minus_29_2)
       full_dates_3 <- full_dates_2 %>% clean_names()
-      worth <- select(full_dates_3,permno,starts_with('rel_mean'))
-      final_loop <- full_dates_1 %>% left_join(worth, by = "permno")
-    }
-  }
-}
-
-
-
-
-
-#way 2
-for (i in 1:length(unique_dates)) {
-  dates <- subset(Master_2, unique_dates[1] == Master_2$date)
-    for (j in 1:length(distinct_permno)){
-      if (distinct_permno[j] == dates$PERMNO){
-        dates[,paste("rel_mean",distinct_permno[j])] <- (sum(dates$RETX) - dates$RETX[j])/29
+      worth <- select(full_dates_3,starts_with('rel_mean'))
+      worth_1 <- select(full_dates_1,starts_with('rel_mean'))
+      worth_2 <- cbind(worth_2,worth)
       }
-    }
+  }
+  worth_final <- cbind(full_dates_1,worth_3)
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
