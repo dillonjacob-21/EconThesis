@@ -168,7 +168,7 @@ Master_2 <- worthy_data_frame %>%
   mutate(counter_05_negative = ifelse(difference < -.05,1,0)) %>% 
   mutate(counter_10_negative = ifelse(difference < -.1,1,0)) %>% 
   mutate(counter_15_negative = ifelse(difference < -.15,1,0)) %>% 
-  mutate(counter_20_negative = ifelse(difference < -.2,1,0))
+  mutate(counter_20_negative = ifelse(difference < -.2,1,0)) 
   
 
 
@@ -191,7 +191,7 @@ sum(Master_2$counter_10_negative)
 sum(Master_2$counter_15_negative)
 #83
 sum(Master_2$counter_20_negative)
-#35i have n
+#35
 
 
 #Normal Distribution Calculations
@@ -202,47 +202,136 @@ mean(Master_2$RETX)
 sd(Master_2$RETX)
 #0.01862142
 
+distinct_permno <- unique(Master_2$PERMNO)
 
 
-distinct_permno <- c()
-
-unique_dates <- c(unique(Master_2$date))
-
-worth <- data.frame()
-full_dates <- data.frame()
-final_loop <- data.frame()
-worth_2 <- data.frame(matrix("",nrow =27))
-#way 1
-# create a list of all other companies and then calculate remove
-# I got it to work for an individual date, but it ends up returning only the relative average of the first one in the subsetted data frame and the last one
-# make sure to paste the relative average where there is currently a 0 so that we can subtract the return of the day from the average return of the other 29 stocks
+library(tidyverse)
 
 
-for (i in 1:length(unique_dates)) {
-  dates <- subset(Master_2, unique_dates[1] == Master_2$date)
-  distinct_permno <- c(unique(dates$PERMNO))
-  for (j in 1:length(distinct_permno)){
-    if (j==1){
-      dates_minus_29 <- subset(dates,distinct_permno[j] == dates$PERMNO)
-      dates_minus_1 <- subset(dates,distinct_permno[j] != dates$PERMNO)
-      dates_minus_1[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1$RETX)/length(dates_minus_1$RETX)
-      dates_minus_29[,paste("rel_mean",distinct_permno[j])] <- 0
-      full_dates <- rbind(dates_minus_1,dates_minus_29)
-      full_dates_1 <- full_dates %>% clean_names
-      } else {
-      dates_minus_29_2 <- subset(dates,distinct_permno[j] == dates$PERMNO)
-      dates_minus_1_2 <- subset(dates,distinct_permno[j] != dates$PERMNO)
-      dates_minus_1_2[,paste("rel_mean",distinct_permno[j])] <- sum(dates_minus_1_2$RETX)/length(dates_minus_1_2$RETX)
-      dates_minus_29_2[,paste("rel_mean",distinct_permno[j])] <- 0
-      full_dates_2 <- rbind(dates_minus_1_2,dates_minus_29_2)
-      full_dates_3 <- full_dates_2 %>% clean_names()
-      worth <- select(full_dates_3,starts_with('rel_mean'))
-      worth_1 <- select(full_dates_1,starts_with('rel_mean'))
-      worth_2 <- cbind(worth_2,worth)
+library(janitor)
+
+# calculating relative averages
+data <- Master_2 %>%
+  
+  clean_names()
+
+
+
+#### Analyze ####
+
+
+
+data_clean <- data %>%
+  
+  select(date,ticker,comnam,permno,retx)
+
+
+
+to_join <- data_clean %>%
+  
+  rename(ai_ticker=ticker,ai_comnam = comnam,ai_permno = permno, ai_retx = retx)
+
+
+
+join <- data_clean %>%
+  
+  left_join(to_join) %>%
+  
+  arrange(date,ai_comnam,ai_permno) %>%
+  
+  filter(permno != ai_permno) %>%
+  
+  group_by(date,ai_comnam,ai_permno,ai_retx) %>%
+  
+  summarize(dj_avg = mean(retx)) %>%
+  
+  mutate(difference = ai_retx - dj_avg)
+
+
+
+
+# re-calculating table 
+
+table_calc <- join %>% 
+  mutate(counter_05_positive = ifelse(difference > .05,1,0)) %>% 
+  mutate(counter_10_positive = ifelse(difference >.1,1,0)) %>% 
+  mutate(counter_15_positive = ifelse(difference > .15,1,0)) %>% 
+  mutate(counter_20_positive = ifelse(difference >.2,1,0)) %>% 
+  mutate(counter_05_negative = ifelse(difference < -.05,1,0)) %>% 
+  mutate(counter_10_negative = ifelse(difference < -.1,1,0)) %>% 
+  mutate(counter_15_negative = ifelse(difference < -.15,1,0)) %>% 
+  mutate(counter_20_negative = ifelse(difference < -.2,1,0)) 
+
+sum(table_calc$counter_05_positive)
+# 3686
+sum(table_calc$counter_10_positive)
+#417
+sum(table_calc$counter_15_positive)
+#115
+sum(table_calc$counter_20_positive)
+#43
+
+sum(table_calc$counter_05_negative)
+#2959
+sum(table_calc$counter_10_negative)
+#329
+sum(table_calc$counter_15_negative)
+#82
+sum(table_calc$counter_20_negative)
+#37
+
+
+#Normal Distribution Calculations
+
+mean(join$ai_retx)
+#0.0003117293
+
+sd(join$ai_retx)
+#0.01857389
+
+
+
+
+# attempting to re create after a big day graphs
+#  I successfully did it, but i need to do it seperarelty for positive and negative
+ai_distinct_permno <- unique(table_calc$ai_permno)
+company <- subset(table_calc, ai_distinct_permno[1] == table_calc$ai_permno)
+big_day <- subset(company,date > "2019-12-31")
+company <- data.frame()
+
+
+for (i in 1:length(ai_distinct_permno)) {
+  company <- subset(table_calc, ai_distinct_permno[i] == table_calc$ai_permno)
+  # arrange the dates in the correct order
+  company %>% arrange(date)
+  company$big_day <- 0
+  # now loop over the length of the data set
+  for (j in 1:nrow(company)){
+    min_j <- min(10,nrow(company)-j)
+    # if the dumby variable is positive, for the next 10 days create a new variable that is 1
+    if(j<nrow(company)-10){
+      if (company$counter_05_positive[j] == 1){
+        company$big_day[(j+1):(j + min_j)] <- 1
       }
+    }else{
+      company$big_day[(j+1):(j+min_j - 1)]
+    }
   }
-  worth_final <- cbind(full_dates_1,worth_3)
+  big_day <- rbind(big_day,company)
 }
+
+
+
+
+big_day_graphs <- subset(big_day, big_day == 1)
+
+ggplot(big_day_graphs, mapping = aes(x=date,y=ai_retx)) + geom_point(size=2)
+
+
+
+
+
+
 
 
 
