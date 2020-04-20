@@ -313,7 +313,7 @@ for (i in 1:length(ai_distinct_permno)) {
         company$big_day[(j+1):(j + min_j)] <- 1
       }
     }else{
-      company$big_day[(j+1):(j+min_j - 1)]
+      company$big_day[(j+1):(j+min_j - 1)] <- 1
     }
   }
   big_day <- rbind(big_day,company)
@@ -333,7 +333,7 @@ ggplot(big_day_graphs, mapping = aes(x=date,y=ai_retx)) + geom_jitter(size=.5)
 
 
 company <- subset(table_calc, ai_distinct_permno[1] == table_calc$ai_permno)
-big_day2 <- subset(company2,date > "2019-12-31")
+big_day2 <- subset(company,date > "2019-12-31")
 company2 <- data.frame()
 
 
@@ -441,3 +441,105 @@ SummaryStats_Positive$day_counter <- (SummaryStats_Positive$day_counter-1)
 
 Plot_Lines <- ggplot() + geom_point(data = SummaryStats_Negative[c(2:11),], aes(day_counter, mean_dij), color = "darkgreen") + geom_point(data = SummaryStats_Positive[c(2:11),], aes(day_counter, mean_dij), color = "red")+ geom_point(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "darkred") + geom_line(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "red")+ geom_point(data = OG_Graph_Neg, aes(day_counter, cum_retx), fill = "green") +geom_line(data = OG_Graph_Neg, aes(day_counter, cum_retx), color = "lightgreen")
 Plot_Lines
+
+
+
+# data in a good place use bigday 2 and bigday 3
+# big day 2 has a day counter for greater than 5
+# big day 3 has a counter for less than 5
+
+table_3 <- big_day2 %>% 
+  select(-starts_with("counter")) %>% 
+  mutate(factor_cutoff = 0)
+
+
+for (i in 1:nrow(table_3)){
+  if (table_3$difference[i] > .05 & table_3$difference[i] <.06){
+    table_3$factor_cutoff[i] <- 5
+  }
+  if (table_3$difference[i] > .06 & table_3$difference[i] < .07){
+    table_3$factor_cutoff[i] <- 6
+  }
+  if (table_3$difference[i] > .07 & table_3$difference[i] < .08){
+    table_3$factor_cutoff[i] <- 7
+  }
+  if (table_3$difference[i] > .08 & table_3$difference[i] <.09){
+    table_3$factor_cutoff[i] <- 8
+  }
+  if (table_3$difference[i] > .09 & table_3$difference[i] < .10){
+    table_3$factor_cutoff[i] <- 9
+  }
+  #if (table_3$difference[i] > .10){
+    #table_3$factor_cutoff[i] <- 10
+  #}
+  if (table_3$difference[i] < (-.05) & table_3$difference[i] > (-.06)){
+    table_3$factor_cutoff[i] <- -5
+  }
+  if (table_3$difference[i] < (-.06) & table_3$difference[i] > (-.07)){
+    table_3$factor_cutoff[i] <- -6
+  }
+  if (table_3$difference[i] < (-.07) & table_3$difference[i] > (-.08)){
+    table_3$factor_cutoff[i] <- -7
+  }
+  if (table_3$difference[i] < (-.08) & table_3$difference[i] > (-.09)){
+    table_3$factor_cutoff[i] <- -8
+  }
+  if (table_3$difference[i] < (-.09) & table_3$difference[i] > (-.10)){
+    table_3$factor_cutoff[i] <- -9
+  }
+  #if (table_3$difference[i] < (-.1)){
+    #table_3$factor_cutoff[i] <- -10
+  #}
+}
+  
+table_3_final <- table_3 %>% 
+  mutate(factor_cutoff = ifelse(difference > .1,10,factor_cutoff)) %>% 
+  mutate(factor_cutoff = ifelse(difference < -.1,-10,factor_cutoff)) %>%
+  select(-big_day,-day_counter) %>% 
+  mutate(day_counter_5 = 0) 
+
+
+table_final_test <- subset(table_3_final,date >"2019-12-31")
+
+for (i in 1:length(ai_distinct_permno)){
+  company_subset <- subset(table_3_final, ai_distinct_permno[i] == table_3_final$ai_permno)
+  company_subset %>%  arrange(date)
+  for (j in 1:nrow(company_subset)){
+    min_j <- min(10,nrow(company_subset)-j)
+    if(j < nrow(company_subset) - 10){
+      if (company_subset$factor_cutoff[j] == 5){
+        company_subset$day_counter_5[(j)] <- 1
+        company_subset$day_counter_5[(j+1)] <- 2
+        company_subset$day_counter_5[(j+2)] <- 3
+        company_subset$day_counter_5[(j+3)] <- 4
+        company_subset$day_counter_5[(j+4)] <- 5
+        company_subset$day_counter_5[(j+5)] <- 6
+        company_subset$day_counter_5[(j+6)] <- 7
+        company_subset$day_counter_5[(j+7)] <- 8
+        company_subset$day_counter_5[(j+8)] <- 9
+        company_subset$day_counter_5[(j+9)] <- 10
+        company_subset$day_counter_5[(j+10)] <- 11
+      }
+    }else{
+    company_subset$day_counter_5[(j+1):(j+min_j-1)]
+    }
+  }
+  table_final_test <- rbind(table_final_test,company_subset)
+}
+
+
+
+
+
+length_tester <- nrow(testerrrrrr)
+
+negative_after <- sum(testerrrrrr$ai_retx < 0)
+
+average <- negative_after/length_tester
+average
+
+
+ghghgh
+
+
+
