@@ -436,8 +436,8 @@ OG_Graph_Pos <- OG_Graph_Data %>%
 
 OG_Graph_Neg <- OG_Graph_Data %>%
   filter(neg_dummy == 1)
-SummaryStats_Negative$day_counter <- (SummaryStats_Negative$day_counter-1)
-SummaryStats_Positive$day_counter <- (SummaryStats_Positive$day_counter-1)
+SummaryStats_Negative$day_counter <- (SummaryStats_Negative$day_counter)
+SummaryStats_Positive$day_counter <- (SummaryStats_Positive$day_counter)
 
 Plot_Lines <- ggplot() + geom_point(data = SummaryStats_Negative[c(2:11),], aes(day_counter, mean_dij), color = "darkgreen") + geom_point(data = SummaryStats_Positive[c(2:11),], aes(day_counter, mean_dij), color = "red")+ geom_point(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "darkred") + geom_line(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "red")+ geom_point(data = OG_Graph_Neg, aes(day_counter, cum_retx), fill = "green") +geom_line(data = OG_Graph_Neg, aes(day_counter, cum_retx), color = "lightgreen")
 Plot_Lines
@@ -470,7 +470,7 @@ for (i in 1:nrow(table_3)){
     table_3$factor_cutoff[i] <- 9
   }
   #if (table_3$difference[i] > .10){
-    #table_3$factor_cutoff[i] <- 10
+  #table_3$factor_cutoff[i] <- 10
   #}
   if (table_3$difference[i] < (-.05) & table_3$difference[i] > (-.06)){
     table_3$factor_cutoff[i] <- -5
@@ -488,15 +488,27 @@ for (i in 1:nrow(table_3)){
     table_3$factor_cutoff[i] <- -9
   }
   #if (table_3$difference[i] < (-.1)){
-    #table_3$factor_cutoff[i] <- -10
+  #table_3$factor_cutoff[i] <- -10
   #}
 }
-  
+
 table_3_final <- table_3 %>% 
   mutate(factor_cutoff = ifelse(difference > .1,10,factor_cutoff)) %>% 
   mutate(factor_cutoff = ifelse(difference < -.1,-10,factor_cutoff)) %>%
   select(-big_day,-day_counter) %>% 
-  mutate(day_counter_5 = 0) 
+  mutate(day_counter_5 = 0) %>%
+  mutate(day_counter_6 =0) %>%
+  mutate(day_counter_7 =0) %>%
+  mutate(day_counter_8 =0) %>%
+  mutate(day_counter_9 =0) %>%
+  mutate(day_counter_10 =0) %>%
+  mutate(day_counter_neg5 =0) %>%
+  mutate(day_counter_neg6 =0) %>%
+  mutate(day_counter_neg7 =0) %>%
+  mutate(day_counter_neg8 =0) %>%
+  mutate(day_counter_neg9 =0) %>%
+  mutate(day_counter_neg10 =0)
+  
 
 
 table_final_test <- subset(table_3_final,date >"2019-12-31")
@@ -520,26 +532,153 @@ for (i in 1:length(ai_distinct_permno)){
         company_subset$day_counter_5[(j+9)] <- 10
         company_subset$day_counter_5[(j+10)] <- 11
       }
+      if (company_subset$factor_cutoff[j] == 6){
+        company_subset$day_counter_6[(j)] <- 1
+        company_subset$day_counter_6[(j+1)] <- 2
+        company_subset$day_counter_6[(j+2)] <- 3
+        company_subset$day_counter_6[(j+3)] <- 4
+        company_subset$day_counter_6[(j+4)] <- 5
+        company_subset$day_counter_6[(j+5)] <- 6
+        company_subset$day_counter_6[(j+6)] <- 7
+        company_subset$day_counter_6[(j+7)] <- 8
+        company_subset$day_counter_6[(j+8)] <- 9
+        company_subset$day_counter_6[(j+9)] <- 10
+        company_subset$day_counter_6[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == 7){
+        company_subset$day_counter_7[(j)] <- 1
+        company_subset$day_counter_7[(j+1)] <- 2
+        company_subset$day_counter_7[(j+2)] <- 3
+        company_subset$day_counter_7[(j+3)] <- 4
+        company_subset$day_counter_7[(j+4)] <- 5
+        company_subset$day_counter_7[(j+5)] <- 6
+        company_subset$day_counter_7[(j+6)] <- 7
+        company_subset$day_counter_7[(j+7)] <- 8
+        company_subset$day_counter_7[(j+8)] <- 9
+        company_subset$day_counter_7[(j+9)] <- 10
+        company_subset$day_counter_7[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == 8){
+        company_subset$day_counter_8[(j)] <- 1
+        company_subset$day_counter_8[(j+1)] <- 2
+        company_subset$day_counter_8[(j+2)] <- 3
+        company_subset$day_counter_8[(j+3)] <- 4
+        company_subset$day_counter_8[(j+4)] <- 5
+        company_subset$day_counter_8[(j+5)] <- 6
+        company_subset$day_counter_8[(j+6)] <- 7
+        company_subset$day_counter_8[(j+7)] <- 8
+        company_subset$day_counter_8[(j+8)] <- 9
+        company_subset$day_counter_8[(j+9)] <- 10
+        company_subset$day_counter_8[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == 9){
+        company_subset$day_counter_9[(j)] <- 1
+        company_subset$day_counter_9[(j+1)] <- 2
+        company_subset$day_counter_9[(j+2)] <- 3
+        company_subset$day_counter_9[(j+3)] <- 4
+        company_subset$day_counter_9[(j+4)] <- 5
+        company_subset$day_counter_9[(j+5)] <- 6
+        company_subset$day_counter_9[(j+6)] <- 7
+        company_subset$day_counter_9[(j+7)] <- 8
+        company_subset$day_counter_9[(j+8)] <- 9
+        company_subset$day_counter_9[(j+9)] <- 10
+        company_subset$day_counter_9[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == 10){
+        company_subset$day_counter_10[(j)] <- 1
+        company_subset$day_counter_10[(j+1)] <- 2
+        company_subset$day_counter_10[(j+2)] <- 3
+        company_subset$day_counter_10[(j+3)] <- 4
+        company_subset$day_counter_10[(j+4)] <- 5
+        company_subset$day_counter_10[(j+5)] <- 6
+        company_subset$day_counter_10[(j+6)] <- 7
+        company_subset$day_counter_10[(j+7)] <- 8
+        company_subset$day_counter_10[(j+8)] <- 9
+        company_subset$day_counter_10[(j+9)] <- 10
+        company_subset$day_counter_10[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-5)){
+        company_subset$day_counter_neg5[(j)] <- 1
+        company_subset$day_counter_neg5[(j+1)] <- 2
+        company_subset$day_counter_neg5[(j+2)] <- 3
+        company_subset$day_counter_neg5[(j+3)] <- 4
+        company_subset$day_counter_neg5[(j+4)] <- 5
+        company_subset$day_counter_neg5[(j+5)] <- 6
+        company_subset$day_counter_neg5[(j+6)] <- 7
+        company_subset$day_counter_neg5[(j+7)] <- 8
+        company_subset$day_counter_neg5[(j+8)] <- 9
+        company_subset$day_counter_neg5[(j+9)] <- 10
+        company_subset$day_counter_neg5[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-6)){
+        company_subset$day_counter_neg6[(j)] <- 1
+        company_subset$day_counter_neg6[(j+1)] <- 2
+        company_subset$day_counter_neg6[(j+2)] <- 3
+        company_subset$day_counter_neg6[(j+3)] <- 4
+        company_subset$day_counter_neg6[(j+4)] <- 5
+        company_subset$day_counter_neg6[(j+5)] <- 6
+        company_subset$day_counter_neg6[(j+6)] <- 7
+        company_subset$day_counter_neg6[(j+7)] <- 8
+        company_subset$day_counter_neg6[(j+8)] <- 9
+        company_subset$day_counter_neg6[(j+9)] <- 10
+        company_subset$day_counter_neg6[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-7)){
+        company_subset$day_counter_neg7[(j)] <- 1
+        company_subset$day_counter_neg7[(j+1)] <- 2
+        company_subset$day_counter_neg7[(j+2)] <- 3
+        company_subset$day_counter_neg7[(j+3)] <- 4
+        company_subset$day_counter_neg7[(j+4)] <- 5
+        company_subset$day_counter_neg7[(j+5)] <- 6
+        company_subset$day_counter_neg7[(j+6)] <- 7
+        company_subset$day_counter_neg7[(j+7)] <- 8
+        company_subset$day_counter_neg7[(j+8)] <- 9
+        company_subset$day_counter_neg7[(j+9)] <- 10
+        company_subset$day_counter_neg7[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-8)){
+        company_subset$day_counter_neg8[(j)] <- 1
+        company_subset$day_counter_neg8[(j+1)] <- 2
+        company_subset$day_counter_neg8[(j+2)] <- 3
+        company_subset$day_counter_neg8[(j+3)] <- 4
+        company_subset$day_counter_neg8[(j+4)] <- 5
+        company_subset$day_counter_neg8[(j+5)] <- 6
+        company_subset$day_counter_neg8[(j+6)] <- 7
+        company_subset$day_counter_neg8[(j+7)] <- 8
+        company_subset$day_counter_neg8[(j+8)] <- 9
+        company_subset$day_counter_neg8[(j+9)] <- 10
+        company_subset$day_counter_neg8[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-9)){
+        company_subset$day_counter_neg9[(j)] <- 1
+        company_subset$day_counter_neg9[(j+1)] <- 2
+        company_subset$day_counter_neg9[(j+2)] <- 3
+        company_subset$day_counter_neg9[(j+3)] <- 4
+        company_subset$day_counter_neg9[(j+4)] <- 5
+        company_subset$day_counter_neg9[(j+5)] <- 6
+        company_subset$day_counter_neg9[(j+6)] <- 7
+        company_subset$day_counter_neg9[(j+7)] <- 8
+        company_subset$day_counter_neg9[(j+8)] <- 9
+        company_subset$day_counter_neg9[(j+9)] <- 10
+        company_subset$day_counter_neg9[(j+10)] <- 11
+      }
+      if (company_subset$factor_cutoff[j] == (-10)){
+        company_subset$day_counter_neg10[(j)] <- 1
+        company_subset$day_counter_neg10[(j+1)] <- 2
+        company_subset$day_counter_neg10[(j+2)] <- 3
+        company_subset$day_counter_neg10[(j+3)] <- 4
+        company_subset$day_counter_neg10[(j+4)] <- 5
+        company_subset$day_counter_neg10[(j+5)] <- 6
+        company_subset$day_counter_neg10[(j+6)] <- 7
+        company_subset$day_counter_neg10[(j+7)] <- 8
+        company_subset$day_counter_neg10[(j+8)] <- 9
+        company_subset$day_counter_neg10[(j+9)] <- 10
+        company_subset$day_counter_neg10[(j+10)] <- 11
+      }
     }else{
-    company_subset$day_counter_5[(j+1):(j+min_j-1)]
+      company_subset$day_counter_5[(j+1):(j+min_j-1)]
     }
   }
   table_final_test <- rbind(table_final_test,company_subset)
 }
-
-
-
-
-
-length_tester <- nrow(testerrrrrr)
-
-negative_after <- sum(testerrrrrr$ai_retx < 0)
-
-average <- negative_after/length_tester
-average
-
-
-ghghgh
-
-
 
