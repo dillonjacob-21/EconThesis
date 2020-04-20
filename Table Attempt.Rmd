@@ -1,0 +1,88 @@
+---
+title: "Making Table 3"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+table_final_test$day_counter_5 <- as.integer(table_final_test$day_counter_5)
+
+#POSITIVE VALUES
+next_day5 <- table_final_test %>%
+ filter(day_counter_5==2|day_counter_6==2|day_counter_7==2|day_counter_8==2|day_counter_9==2|day_counter_10==2)
+prop5pos <- sum(next_day5$ai_retx > 0)/nrow(next_day5)
+
+next_day6 <- table_final_test %>%
+ filter(day_counter_6==2|day_counter_7==2|day_counter_8==2|day_counter_9==2|day_counter_10==2)
+prop6pos <- sum(next_day6$ai_retx > 0)/nrow(next_day6)
+
+next_day7 <- table_final_test %>%
+ filter(day_counter_7==2|day_counter_8==2|day_counter_9==2|day_counter_10==2)
+prop7pos <- sum(next_day7$ai_retx > 0)/nrow(next_day7)
+
+next_day8 <- table_final_test %>%
+ filter(day_counter_8==2|day_counter_9==2|day_counter_10==2)
+prop8pos <- sum(next_day8$ai_retx > 0)/nrow(next_day8)
+
+next_day9 <- table_final_test %>%
+ filter(day_counter_9==2|day_counter_10==2)
+prop9pos <- sum(next_day9$ai_retx > 0)/nrow(next_day9)
+
+next_day10 <- table_final_test %>%
+  filter(day_counter_10 == 2) 
+prop10pos <- sum(next_day10$ai_retx > 0)/nrow(next_day10)
+
+#NEGATIVE VALUES
+next_day5neg <- table_final_test %>%
+ filter(day_counter_neg5==2|day_counter_neg6==2|day_counter_neg7==2|day_counter_neg8==2|day_counter_neg9==2|day_counter_neg10==2)
+prop5neg <- sum(next_day5neg$ai_retx > 0)/nrow(next_day5neg)
+
+next_day6neg <- table_final_test %>%
+ filter(day_counter_neg6==2|day_counter_neg7==2|day_counter_neg8==2|day_counter_neg9==2|day_counter_neg10==2)
+prop6neg <- sum(next_day6neg$ai_retx > 0)/nrow(next_day6neg)
+
+next_day7neg <- table_final_test %>%
+ filter(day_counter_neg7==2|day_counter_neg8==2|day_counter_neg9==2|day_counter_neg10==2)
+prop7neg <- sum(next_day7neg$ai_retx > 0)/nrow(next_day7neg)
+
+next_day8neg <- table_final_test %>%
+ filter(day_counter_neg8==2|day_counter_neg9==2|day_counter_neg10==2)
+prop8neg <- sum(next_day8neg$ai_retx > 0)/nrow(next_day8neg)
+
+next_day9neg <- table_final_test %>%
+ filter(day_counter_neg9==2|day_counter_neg10==2)
+prop9neg <- sum(next_day9neg$ai_retx > 0)/nrow(next_day9neg)
+
+next_day10neg <- table_final_test %>%
+  filter(day_counter_neg10 == 2) 
+prop10neg <- sum(next_day10neg$ai_retx > 0)/nrow(next_day10neg)
+
+```
+
+
+Hard Coding
+```{r}
+library(formattable)
+library(kableExtra)
+table3 <- matrix(c(5,prop5pos, prop5neg, "pvalue5", 6, prop6pos,prop6neg,"pvalue6",7,prop7pos,prop7neg,"pvalue7",8,prop8pos,prop8neg,"pvalue8",9,prop9pos,prop9neg,"pvalue9",10,prop10pos,prop10neg,"pvalue10"), ncol = 4, byrow = TRUE)
+colnames(table3) <- c("Cutoff (%)", "After + Big Day", "After - Big Day", "p-value")
+table3 <- as.table(table3, digits = 2, latex = TRUE)
+table3
+
+table3 %>%
+  knitr::kable(Caption = "Table 3: Percentage of Stocks with Positive Returns after a Big Day", digits = 2) %>%
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE)
+#as.data.frame(table3)
+formattable(table3)
+#formattable(table3, align = c("l", rep("r", NCOL(table3) - 1)))
+```
+
+
+Using R's table library:
+
+I have no idea how to do this
+```{r}
+#library(tables)
+
+```
+
