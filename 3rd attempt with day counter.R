@@ -376,7 +376,7 @@ daycounterdataPositive <- big_day2 %>%
 
 SummaryStats_Positive <- daycounterdataPositive %>%
   group_by(day_counter) %>%
-  summarise(meanretx = mean(ai_retx), meandiff = mean(difference))
+  summarise(meanretx = mean(ai_retx), meandiff = mean(difference), mean_dij = mean(dj_avg))
 
 company3 <- subset(table_calc, ai_distinct_permno[1] == table_calc$ai_permno)
 big_day3 <- subset(company3,date > "2019-12-31")
@@ -419,7 +419,7 @@ daycounterdata_Negative <- big_day3 %>%
 
 SummaryStats_Negative <- daycounterdata_Negative %>%
   group_by(day_counter) %>%
-  summarise(meanretx = mean(ai_retx), meandiff = mean(difference))
+  summarise(meanretx = mean(ai_retx), meandiff = mean(difference), mean_dij = mean(dj_avg))
 
 #write.csv(SummaryStats_Negative, "C:\\Users\\dillo\\OneDrive\\Desktop\\EconThesis-master\\SummaryStats_Negative.csv")
 #write.csv(SummaryStats_Positive, "C:\\Users\\dillo\\OneDrive\\Desktop\\EconThesis-master\\SummaryStats_Positive.csv")
@@ -436,6 +436,8 @@ OG_Graph_Pos <- OG_Graph_Data %>%
 
 OG_Graph_Neg <- OG_Graph_Data %>%
   filter(neg_dummy == 1)
+SummaryStats_Negative$day_counter <- (SummaryStats_Negative$day_counter-1)
+SummaryStats_Positive$day_counter <- (SummaryStats_Positive$day_counter-1)
 
-Plot_Lines <- ggplot() + geom_point(data = OG_Graph_Pos, aes(day_counter, cum_retx)) + geom_smooth(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "darkgreen", fill = "green")+ geom_point(data = OG_Graph_Neg, aes(day_counter, cum_retx)) +geom_smooth(data = OG_Graph_Neg, aes(day_counter, cum_retx), color = "darkred", fill = "red")
+Plot_Lines <- ggplot() + geom_point(data = SummaryStats_Negative[c(2:11),], aes(day_counter, mean_dij), color = "darkgreen") + geom_point(data = SummaryStats_Positive[c(2:11),], aes(day_counter, mean_dij), color = "red")+ geom_point(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "darkred") + geom_line(data = OG_Graph_Pos, aes(day_counter, cum_retx), color = "red")+ geom_point(data = OG_Graph_Neg, aes(day_counter, cum_retx), fill = "green") +geom_line(data = OG_Graph_Neg, aes(day_counter, cum_retx), color = "lightgreen")
 Plot_Lines
